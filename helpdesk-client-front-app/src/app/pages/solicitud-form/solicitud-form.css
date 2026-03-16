@@ -203,6 +203,52 @@ textarea.form-control {
   margin-top: 0.8rem;
 }
 
+.remote-access-fields {
+  margin-top: 0.8rem;
+  margin-bottom: 0.8rem;
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 0.75rem;
+}
+
+.remote-access-fields .form-group {
+  flex: 1;
+  min-width: 0;
+  margin-bottom: 0;
+  padding-right: 0;
+  padding-left: 0;
+}
+
+.remote-access-fields .form-label {
+  font-size: 0.88rem;
+  font-weight: 500;
+  margin-bottom: 0.35rem;
+}
+
+.remote-access-fields .form-text {
+  font-size: 0.75rem;
+  margin-top: 0.2rem;
+}
+
+.remote-access-fields .form-control,
+.remote-access-fields ng-select {
+  width: 100%;
+}
+
+:host ::ng-deep .ng-select .ng-arrow-wrapper .ng-arrow {
+  border-color: #6f7780 transparent transparent;
+  border-style: solid;
+  border-width: 5px 5px 0;
+  height: 0;
+  width: 0;
+  transition: transform 0.2s ease;
+}
+
+:host ::ng-deep .ng-select.ng-select-opened .ng-arrow-wrapper .ng-arrow {
+  transform: rotate(180deg);
+  border-width: 0 5px 5px;
+}
+
 .form-text {
   display: block;
   margin-top: 0.25rem;
@@ -886,7 +932,7 @@ textarea.form-control {
   overflow: hidden;
   text-overflow: ellipsis;
   display: -webkit-box;
-  -webkit-line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
 }
 

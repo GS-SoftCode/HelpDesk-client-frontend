@@ -7,4 +7,8 @@ export class TicketModel {
     codCliente!: string;
     codTecnico!: string;
     codEstado!: number;
+    tfnoCliente!: string;
+    typeRemote?: string;
+    codRemote?: string;
+    passRemote?: string;
 }

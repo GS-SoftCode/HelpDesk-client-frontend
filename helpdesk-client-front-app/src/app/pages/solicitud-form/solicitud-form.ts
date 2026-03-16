@@ -3,8 +3,6 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { NgSelectComponent, NgOptionTemplateDirective } from '@ng-select/ng-select';
 
-import { SolicitanteModel } from '../../models/solicitante.model';
-import { TicketModel } from '../../models/ticket.model';
 import { SolTickModel } from '../../models/sol-tick.model';
 import { EmpresaModel } from '../../models/empresa.model';
 
@@ -50,6 +48,9 @@ export class SolicitudForm {
   imagen2Preview: string = '';
   imagen1Name: string = '';
   imagen2Name: string = '';
+
+  // Opciones para el dropdown de plataforma de acceso remoto
+  typeRemote: string[] = ['Ninguna', 'AnyDesk', 'RustDesk'];
   
   constructor(
     private fb: FormBuilder,
@@ -66,6 +67,9 @@ export class SolicitudForm {
       email: ['', [Validators.required, Validators.email]],
       whatsapp: ['', Validators.required],
       motivo: ['', [Validators.required, Validators.minLength(20)]],
+      typeRemote: ['Ninguna'],
+      codRemote: [''],
+      passRemote: [''],
       terms: [false, Validators.requiredTrue],
     });
     
@@ -79,7 +83,9 @@ export class SolicitudForm {
   loadEmpresas(): void {
     this._empresaService.getAll().subscribe({
       next: (resp) => {
-        this.empresas = resp ?? [];
+        setTimeout(() => {
+          this.empresas = resp ?? [];
+        }, 0);
       },
       error: (err) => {
         console.error('Error cargando empresas', err);
@@ -239,6 +245,10 @@ export class SolicitudForm {
         codCliente: '0',
         codTecnico: '0',
         codEstado: 0,
+        tfnoCliente: this.supportForm.get('whatsapp')?.value||'',
+        typeRemote: this.supportForm.get('typeRemote')?.value||'',
+        codRemote: this.supportForm.get('codRemote')?.value||'',
+        passRemote: this.supportForm.get('passRemote')?.value||''
       },
       img1: this.imagen1Base64 || undefined,
       img2: this.imagen2Base64 || undefined

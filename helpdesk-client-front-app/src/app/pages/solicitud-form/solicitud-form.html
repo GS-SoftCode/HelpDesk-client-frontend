@@ -6,8 +6,6 @@
 
     <div class="form-content">
 
-      <p class="form-description">Complete los siguientes datos para atender su solicitud</p>
-
       <form class="support-form" [formGroup]="supportForm" (ngSubmit)="onSubmit()">
         <div class="main-sections-layout">
           <div class="left-sections-column">
@@ -24,7 +22,6 @@
                     bindLabel="nomEmpresa"
                     [searchFn]="searchEmpresa"
                     [editableSearchTerm]="true"
-                    [clearable]="true"
                     [addTag]="true"  
                     placeholder="Buscar por nombre o RUC"
                     notFoundText="No se encontraron empresas"
@@ -113,6 +110,31 @@
                 </div>
               </div>
 
+              <!-- Campos de acceso remoto -->
+              <div class="row remote-access-fields">
+                <div class="form-group col-md-4">
+                  <label class="form-label" for="typeRemote">Plataforma</label>
+                  <ng-select
+                    formControlName="typeRemote"
+                    [items]="typeRemote"
+                    [clearable]="false"
+                    tabindex="8">
+                  </ng-select>
+                </div>
+
+                <div class="form-group col-md-4">
+                  <label class="form-label" for="codRemote">Código de Acceso</label>
+                  <input type="text" formControlName="codRemote" class="form-control"
+                    placeholder="Ingrese código" tabindex="9" />
+                </div>
+
+                <div class="form-group col-md-4">
+                  <label class="form-label" for="passRemote">Contraseña</label>
+                  <input type="password" formControlName="passRemote" class="form-control"
+                    placeholder="Ingrese contraseña" tabindex="10" />
+                </div>
+              </div>
+
               <div class="form-group upload-group">
                 <label class="form-label" for="evidencias">Subir imágenes o capturas de pantalla</label>
                 
@@ -124,7 +146,7 @@
                   accept="image/*" 
                   multiple 
                   (change)="onFileSelected($event)"
-                  tabindex="8" />
+                  tabindex="10" />
                 
                 <!-- Botón personalizado -->
                 <label for="evidencias" class="file-upload-button">
@@ -170,7 +192,7 @@
         <div class="form-group terms-checkbox mt-2">
           <div class="custom-control custom-checkbox">
             <input type="checkbox" class="custom-control-input" id="terms" formControlName="terms"
-              [ngClass]="{ 'is-invalid': submitted && f['terms'].errors }" tabindex="9">
+              [ngClass]="{ 'is-invalid': submitted && f['terms'].errors }" tabindex="11">
             <label class="custom-control-label" for="terms">
               Acepto los <a href="#" data-toggle="modal" data-target="#termsModal">términos y condiciones</a> del
               servicio
@@ -181,7 +203,7 @@
           </div>
         </div>
 
-        <button type="submit" [disabled]="loading" class="btn btn-primary btn-block submit-button mt-3" tabindex="10">
+        <button type="submit" [disabled]="loading" class="btn btn-primary btn-block submit-button mt-3" tabindex="12">
           <span *ngIf="loading" class="spinner-border spinner-border-sm mr-1"></span>
           Enviar Solicitud de Soporte
         </button>
