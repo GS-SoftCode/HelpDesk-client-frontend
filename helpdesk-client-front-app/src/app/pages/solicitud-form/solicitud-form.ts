@@ -104,13 +104,10 @@ export class SolicitudForm {
 
   onFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
-    
     if (!input.files || input.files.length === 0) {
       return;
     }
-
     const files = Array.from(input.files);
-    
     // Validar que no sean más de 2 imágenes
     const imagenesActuales = (this.imagen1Base64 ? 1 : 0) + (this.imagen2Base64 ? 1 : 0);
     if (imagenesActuales + files.length > 2) {
@@ -118,25 +115,22 @@ export class SolicitudForm {
       input.value = '';
       return;
     }
-
     // Procesar cada archivo
+    let processed = 0;
     files.forEach((file) => {
       // Validar que sea una imagen
       if (!file.type.startsWith('image/')) {
         alert(`⚠️ El archivo "${file.name}" no es una imagen válida`);
         return;
       }
-
       // Validar tamaño (máximo 2MB por imagen)
       const maxSizeInBytes = 2 * 1024 * 1024;
       if (file.size > maxSizeInBytes) {
         alert(`⚠️ La imagen "${file.name}" supera el tamaño máximo de 2MB`);
         return;
       }
-
       // Determinar dónde colocar la imagen
       let targetSlot: number;
-      
       if (!this.imagen1Base64) {
         targetSlot = 0;
       } else if (!this.imagen2Base64) {
@@ -145,22 +139,22 @@ export class SolicitudForm {
         alert('⚠️ Ya tienes 2 imágenes cargadas. Elimina una para agregar otra.');
         return;
       }
-      
       // Convertir a Base64
-      this.convertToBase64(file, targetSlot);
+      this.convertToBase64(file, targetSlot, true);
+      processed++;
     });
-
-    // Limpiar el input
+    // Forzar actualización de vista si se procesó al menos una imagen
+    if (processed > 0) {
+      setTimeout(() => this.cdr.detectChanges(), 0);
+    }
     input.value = '';
   }
 
   // ✅ NUEVO MÉTODO: Convertir archivo a Base64
-  convertToBase64(file: File, index: number): void {
+  convertToBase64(file: File, index: number, forceDetect: boolean = false): void {
     const reader = new FileReader();
-    
     reader.onload = () => {
       const base64String = reader.result as string;
-      
       if (index === 0) {
         this.imagen1Base64 = base64String;
         this.imagen1Preview = base64String;
@@ -170,16 +164,15 @@ export class SolicitudForm {
         this.imagen2Preview = base64String;
         this.imagen2Name = file.name;
       }
-      
-      this.cdr.detectChanges();
+      if (forceDetect) {
+        setTimeout(() => this.cdr.detectChanges(), 0);
+      }
       console.log(`✅ Imagen ${index + 1} convertida a Base64:`, file.name);
     };
-
     reader.onerror = () => {
       console.error('❌ Error al leer el archivo:', file.name);
       alert(`❌ Error al procesar la imagen "${file.name}"`);
     };
-
     reader.readAsDataURL(file);
   }
 
