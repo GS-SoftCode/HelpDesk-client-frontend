@@ -1,4 +1,4 @@
-import { Component, ChangeDetectorRef } from '@angular/core';
+import { Component, ChangeDetectorRef, HostListener, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, AbstractControl, ValidationErrors, FormsModule } from '@angular/forms';
 
@@ -46,6 +46,12 @@ export class SolicitudForm {
   filteredEmpresas: EmpresaModel[] = [];
   selectedEmpresa: EmpresaModel | null = null;
 
+  // Propiedades para el dropdown personalizado de plataforma
+  searchTextPlatform: string = '';
+  showDropdownPlatform: boolean = false;
+  filteredPlatforms: string[] = [];
+  selectedPlatform: string = '';
+
   imagen1Base64: string = '';
   imagen2Base64: string = '';
   imagen1Preview: string = '';
@@ -60,7 +66,8 @@ export class SolicitudForm {
     private fb: FormBuilder,
     private _ticketService: TicketService,
     private _empresaService: EmpresaService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private elementRef: ElementRef
   ) {}
 
   ngOnInit(): void {
@@ -79,6 +86,11 @@ export class SolicitudForm {
     
     this.loadEmpresas();
     this.filteredEmpresas = [];
+    
+    // Inicializar dropdown de plataforma
+    this.filteredPlatforms = [...this.typeRemote];
+    this.searchTextPlatform = 'Ninguna';
+    this.selectedPlatform = 'Ninguna';
   }
 
   get f() {
@@ -103,6 +115,10 @@ export class SolicitudForm {
   // Métodos para el dropdown personalizado de empresas
   onSearchChange(): void {
     const term = this.searchText.toLowerCase().trim();
+    
+    // Limpiar selección cuando el usuario escribe
+    this.selectedEmpresa = null;
+    
     if (term === '') {
       this.filteredEmpresas = [...this.empresas];
       this.showDropdown = true;
@@ -132,13 +148,60 @@ export class SolicitudForm {
   }
 
   onInputBlur(): void {
-    setTimeout(() => {
-      // Si el usuario escribió texto libre sin seleccionar una empresa
-      if (this.searchText && !this.selectedEmpresa) {
-        this.supportForm.patchValue({ ruc: this.searchText });
-      }
+    // Si el usuario escribió texto libre sin seleccionar una empresa
+    if (this.searchText && !this.selectedEmpresa) {
+      this.supportForm.patchValue({ ruc: this.searchText });
+    }
+  }
+
+  // Métodos para el dropdown personalizado de plataforma
+  onSearchChangePlatform(): void {
+    const term = this.searchTextPlatform.toLowerCase().trim();
+    
+    if (term === '') {
+      this.filteredPlatforms = [...this.typeRemote];
+      this.showDropdownPlatform = true;
+    } else {
+      this.filteredPlatforms = this.typeRemote.filter(platform =>
+        platform.toLowerCase().includes(term)
+      );
+      this.showDropdownPlatform = true;
+    }
+  }
+
+  toggleDropdownPlatform(event: MouseEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.showDropdownPlatform = !this.showDropdownPlatform;
+    if (this.showDropdownPlatform && this.searchTextPlatform === '') {
+      this.filteredPlatforms = [...this.typeRemote];
+    }
+  }
+
+  selectPlatform(platform: string): void {
+    this.selectedPlatform = platform;
+    this.searchTextPlatform = platform;
+    this.supportForm.patchValue({ typeRemote: platform });
+    this.showDropdownPlatform = false;
+  }
+
+  onInputBlurPlatform(): void {
+    // No hacer nada aquí, el cierre lo maneja el HostListener
+  }
+
+  // Detectar clics fuera de los dropdowns para cerrarlos
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    const target = event.target as HTMLElement;
+    
+    // Verificar si el clic es dentro de algún dropdown
+    const clickedInsideEmpresa = target.closest('.custom-dropdown');
+    
+    if (!clickedInsideEmpresa) {
+      // Si el clic es fuera de cualquier dropdown, cerrar ambos
       this.showDropdown = false;
-    }, 200);
+      this.showDropdownPlatform = false;
+    }
   }
 
   onFileSelected(event: Event): void {
@@ -277,10 +340,10 @@ export class SolicitudForm {
         codCliente: '0',
         codTecnico: '0',
         codEstado: 0,
-        tfnoCliente: this.supportForm.get('whatsapp')?.value||'',
-        typeRemote: this.supportForm.get('typeRemote')?.value||'',
-        codRemote: this.supportForm.get('codRemote')?.value||'',
-        passRemote: this.supportForm.get('passRemote')?.value||''
+        tfnoCliente: this.supportForm.get('whatsapp')?.value || null,
+        typeRemote: this.supportForm.get('typeRemote')?.value || null,
+        codRemote: this.supportForm.get('codRemote')?.value || null,
+        passRemote: this.supportForm.get('passRemote')?.value || null
       },
       img1: this.imagen1Base64 || undefined,
       img2: this.imagen2Base64 || undefined

@@ -1,6 +1,7 @@
 <html>
   <div class="page-container">
     <header class="form-header">
+      <img src="logos/asotec-logo.png" alt="Logo Asotec" class="header-logo" />
       <h2 class="form-title">Solicitud de Soporte Técnico</h2>
     </header>
 
@@ -40,6 +41,7 @@
               No se encontraron empresas
             </div>
           </div>
+          <small class="form-text">Busque su empresa por nombre o RUC, o ingrese el nombre usted mismo.</small>
           <div *ngIf="submitted && f['ruc'].errors?.['required']" class="error-message">
             El campo Empresa o RUC es requerido
           </div>
@@ -110,9 +112,36 @@
         <div class="input-row remote-fields">
           <div class="form-group input-col-third">
             <label class="form-label" for="typeRemote">Plataforma</label>
-            <select id="typeRemote" formControlName="typeRemote" tabindex="8">
-              <option *ngFor="let platform of typeRemote" [value]="platform">{{ platform }}</option>
-            </select>
+            <div class="custom-dropdown">
+              <input
+                type="text"
+                id="typeRemote"
+                class="dropdown-input"
+                [(ngModel)]="searchTextPlatform"
+                [ngModelOptions]="{standalone: true}"
+                (focus)="showDropdownPlatform = true"
+                (input)="onSearchChangePlatform()"
+                (blur)="onInputBlurPlatform()"
+                placeholder="Seleccione plataforma"
+                autocomplete="off"
+                tabindex="8"
+              />
+              <div class="dropdown-arrow" (mousedown)="toggleDropdownPlatform($event)">▼</div>
+              
+              <ul class="dropdown-list" *ngIf="showDropdownPlatform && filteredPlatforms.length > 0">
+                <li
+                  *ngFor="let platform of filteredPlatforms"
+                  class="dropdown-item"
+                  (mousedown)="selectPlatform(platform)"
+                >
+                  {{ platform }}
+                </li>
+              </ul>
+              
+              <div class="dropdown-no-results" *ngIf="showDropdownPlatform && filteredPlatforms.length === 0 && searchTextPlatform">
+                No se encontraron plataformas
+              </div>
+            </div>
           </div>
           <div class="form-group input-col-third">
             <label class="form-label" for="codRemote">Código de Acceso</label>
@@ -128,23 +157,25 @@
 
         <div class="form-group upload-section">
           <label class="form-label" for="evidencias">Imágenes de referencia</label>
-          <input type="file" #fileInput id="evidencias" class="hidden-file-input" accept="image/*"
-            multiple (change)="onFileSelected($event)" style="display: none;">
-          <button type="button" class="upload-btn" (click)="fileInput.click()">Subir</button>
+          <div class="upload-container">
+            <input type="file" #fileInput id="evidencias" class="hidden-file-input" accept="image/*"
+              multiple (change)="onFileSelected($event)" style="display: none;">
+            <button type="button" class="upload-btn" (click)="fileInput.click()">
+              <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="17 8 12 3 7 8"></polyline>
+                <line x1="12" y1="3" x2="12" y2="15"></line>
+              </svg>
+            </button>
 
-          <div class="preview-list" *ngIf="imagen1Preview || imagen2Preview">
-            <div class="preview-card" *ngIf="imagen1Preview">
-              <img [src]="imagen1Preview" alt="Vista previa imagen 1" class="preview-image">
-              <div class="image-details">
-                <span class="image-filename">{{ imagen1Name }}</span>
-                <button type="button" class="remove-btn" (click)="removeImage(1)">Eliminar</button>
+            <div class="preview-list" *ngIf="imagen1Preview || imagen2Preview">
+              <div class="preview-card" *ngIf="imagen1Preview">
+                <img [src]="imagen1Preview" alt="Vista previa imagen 1" class="preview-image">
+                <button type="button" class="remove-btn" (click)="removeImage(1)" title="{{ imagen1Name }}">X</button>
               </div>
-            </div>
-            <div class="preview-card" *ngIf="imagen2Preview">
-              <img [src]="imagen2Preview" alt="Vista previa imagen 2" class="preview-image">
-              <div class="image-details">
-                <span class="image-filename">{{ imagen2Name }}</span>
-                <button type="button" class="remove-btn" (click)="removeImage(2)">Eliminar</button>
+              <div class="preview-card" *ngIf="imagen2Preview">
+                <img [src]="imagen2Preview" alt="Vista previa imagen 2" class="preview-image">
+                <button type="button" class="remove-btn" (click)="removeImage(2)" title="{{ imagen2Name }}">X</button>
               </div>
             </div>
           </div>
