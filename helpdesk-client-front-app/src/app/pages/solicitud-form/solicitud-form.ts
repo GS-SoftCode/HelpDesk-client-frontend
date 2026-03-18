@@ -1,7 +1,6 @@
 import { Component, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
-import { NgSelectComponent, NgOptionTemplateDirective } from '@ng-select/ng-select';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, AbstractControl, ValidationErrors, FormsModule } from '@angular/forms';
 
 import { SolTickModel } from '../../models/sol-tick.model';
 import { EmpresaModel } from '../../models/empresa.model';
@@ -26,10 +25,9 @@ function empresaValidator(control: AbstractControl): ValidationErrors | null {
   selector: 'app-solicitud-form',
   imports: [
     ReactiveFormsModule,
+    FormsModule,
     NgClass,
-    CommonModule,
-    NgSelectComponent,
-    NgOptionTemplateDirective
+    CommonModule
   ],
   templateUrl: './solicitud-form.html',
   styleUrl: './solicitud-form.css',
@@ -41,6 +39,12 @@ export class SolicitudForm {
   error: string = '';
 
   empresas: EmpresaModel[] = [];
+  
+  // Propiedades para el dropdown personalizado de empresas
+  searchText: string = '';
+  showDropdown: boolean = false;
+  filteredEmpresas: EmpresaModel[] = [];
+  selectedEmpresa: EmpresaModel | null = null;
 
   imagen1Base64: string = '';
   imagen2Base64: string = '';
@@ -74,6 +78,7 @@ export class SolicitudForm {
     });
     
     this.loadEmpresas();
+    this.filteredEmpresas = [];
   }
 
   get f() {
@@ -85,6 +90,7 @@ export class SolicitudForm {
       next: (resp) => {
         setTimeout(() => {
           this.empresas = resp ?? [];
+          this.filteredEmpresas = [...this.empresas];
         }, 0);
       },
       error: (err) => {
@@ -94,13 +100,46 @@ export class SolicitudForm {
     });
   }
 
-  searchEmpresa = (term: string, item: EmpresaModel): boolean => {
-    const t = term.toLowerCase().trim();
-    return (
-      item.nomEmpresa?.toLowerCase().includes(t) ||
-      item.nomRuc?.toLowerCase().includes(t)
-    );
-  };
+  // Métodos para el dropdown personalizado de empresas
+  onSearchChange(): void {
+    const term = this.searchText.toLowerCase().trim();
+    if (term === '') {
+      this.filteredEmpresas = [...this.empresas];
+      this.showDropdown = true;
+    } else {
+      this.filteredEmpresas = this.empresas.filter(empresa =>
+        empresa.nomEmpresa?.toLowerCase().includes(term) ||
+        empresa.nomRuc?.toLowerCase().includes(term)
+      );
+      this.showDropdown = true;
+    }
+  }
+
+  toggleDropdown(event: MouseEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.showDropdown = !this.showDropdown;
+    if (this.showDropdown && this.searchText === '') {
+      this.filteredEmpresas = [...this.empresas];
+    }
+  }
+
+  selectEmpresa(empresa: EmpresaModel): void {
+    this.selectedEmpresa = empresa;
+    this.searchText = empresa.nomEmpresa;
+    this.supportForm.patchValue({ ruc: empresa });
+    this.showDropdown = false;
+  }
+
+  onInputBlur(): void {
+    setTimeout(() => {
+      // Si el usuario escribió texto libre sin seleccionar una empresa
+      if (this.searchText && !this.selectedEmpresa) {
+        this.supportForm.patchValue({ ruc: this.searchText });
+      }
+      this.showDropdown = false;
+    }, 200);
+  }
 
   onFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;

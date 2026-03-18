@@ -10,21 +10,37 @@
       <section class="card-section">
         <h4 class="section-heading">Empresa</h4>
         <div class="form-group">
-          <ng-select
-            id="ruc"
-            formControlName="ruc"
-            [items]="empresas"
-            bindLabel="nomEmpresa"
-            [searchFn]="searchEmpresa"
-            [editableSearchTerm]="true"
-            [addTag]="true"
-            placeholder="Buscar por nombre o RUC"
-            notFoundText="No se encontraron empresas"
-            [ngClass]="{ 'is-invalid': submitted && f['ruc'].errors }">
-            <ng-template ng-label-tmp let-item="item">{{ item.nomEmpresa || item }}</ng-template>
-            <ng-template ng-option-tmp let-item="item">{{ item.nomRuc }} - {{ item.nomEmpresa }}</ng-template>
-          </ng-select>
-          <div *ngIf="submitted && f['ruc'].errors?.['required']" class="invalid-feedback d-block">
+          <div class="custom-dropdown" [ngClass]="{ 'is-invalid': submitted && f['ruc'].errors }">
+            <input
+              type="text"
+              id="ruc"
+              class="dropdown-input"
+              [(ngModel)]="searchText"
+              [ngModelOptions]="{standalone: true}"
+              (focus)="showDropdown = true"
+              (input)="onSearchChange()"
+              (blur)="onInputBlur()"
+              placeholder="Buscar por nombre o RUC"
+              autocomplete="off"
+              tabindex="1"
+            />
+            <div class="dropdown-arrow" (mousedown)="toggleDropdown($event)">▼</div>
+            
+            <ul class="dropdown-list" *ngIf="showDropdown && filteredEmpresas.length > 0">
+              <li
+                *ngFor="let empresa of filteredEmpresas"
+                class="dropdown-item"
+                (mousedown)="selectEmpresa(empresa)"
+              >
+                {{ empresa.nomRuc }} - {{ empresa.nomEmpresa }}
+              </li>
+            </ul>
+            
+            <div class="dropdown-no-results" *ngIf="showDropdown && filteredEmpresas.length === 0 && searchText">
+              No se encontraron empresas
+            </div>
+          </div>
+          <div *ngIf="submitted && f['ruc'].errors?.['required']" class="error-message">
             El campo Empresa o RUC es requerido
           </div>
         </div>
@@ -33,44 +49,44 @@
       <!-- Datos del Solicitante -->
       <section class="card-section">
         <h4 class="section-heading">Datos del Solicitante</h4>
-        <div class="row">
-          <div class="form-group col-md-6">
+        <div class="input-row">
+          <div class="form-group input-col-half">
             <label class="form-label" for="nombres">Nombres</label>
-            <input type="text" id="nombres" formControlName="nombres" class="form-control"
+            <input type="text" id="nombres" formControlName="nombres"
               [ngClass]="{ 'is-invalid': submitted && f['nombres'].errors }" 
               placeholder="Ingrese sus nombres" tabindex="3">
-            <div *ngIf="submitted && f['nombres'].errors?.['required']" class="invalid-feedback">
+            <div *ngIf="submitted && f['nombres'].errors?.['required']" class="error-message">
               Los nombres son requeridos
             </div>
           </div>
-          <div class="form-group col-md-6">
+          <div class="form-group input-col-half">
             <label class="form-label" for="apellidos">Apellidos</label>
-            <input type="text" id="apellidos" formControlName="apellidos" class="form-control"
+            <input type="text" id="apellidos" formControlName="apellidos"
               [ngClass]="{ 'is-invalid': submitted && f['apellidos'].errors }" 
               placeholder="Ingrese sus apellidos" tabindex="4">
-            <div *ngIf="submitted && f['apellidos'].errors?.['required']" class="invalid-feedback">
+            <div *ngIf="submitted && f['apellidos'].errors?.['required']" class="error-message">
               Los apellidos son requeridos
             </div>
           </div>
         </div>
 
-        <div class="row">
-          <div class="form-group col-md-6">
+        <div class="input-row">
+          <div class="form-group input-col-half">
             <label class="form-label" for="email">Correo Electrónico</label>
-            <input type="email" id="email" formControlName="email" class="form-control"
+            <input type="email" id="email" formControlName="email"
               [ngClass]="{ 'is-invalid': submitted && f['email'].errors }" 
               placeholder="ejemplo@empresa.com" tabindex="5">
-            <div *ngIf="submitted && f['email'].errors" class="invalid-feedback">
+            <div *ngIf="submitted && f['email'].errors" class="error-message">
               <div *ngIf="f['email'].errors['required']">El correo electrónico es requerido</div>
               <div *ngIf="f['email'].errors['email']">Debe ingresar un correo electrónico válido</div>
             </div>
           </div>
-          <div class="form-group col-md-6">
+          <div class="form-group input-col-half">
             <label class="form-label" for="whatsapp">WhatsApp</label>
-            <input type="tel" id="whatsapp" formControlName="whatsapp" class="form-control"
+            <input type="tel" id="whatsapp" formControlName="whatsapp"
               [ngClass]="{ 'is-invalid': submitted && f['whatsapp'].errors }"
               placeholder="Número de contacto por WhatsApp" tabindex="6">
-            <div *ngIf="submitted && f['whatsapp'].errors?.['required']" class="invalid-feedback">
+            <div *ngIf="submitted && f['whatsapp'].errors?.['required']" class="error-message">
               El número de WhatsApp es requerido
             </div>
           </div>
@@ -82,29 +98,30 @@
         <h4 class="section-heading">Motivo del Soporte</h4>
         <div class="form-group">
           <label class="form-label" for="motivo">Descripción del problema</label>
-          <textarea id="motivo" formControlName="motivo" class="form-control issue-textarea"
+          <textarea id="motivo" formControlName="motivo" class="issue-textarea"
             [ngClass]="{ 'is-invalid': submitted && f['motivo'].errors }"
             placeholder="Describa detalladamente el motivo de su solicitud" tabindex="7"></textarea>
-          <div *ngIf="submitted && f['motivo'].errors" class="invalid-feedback">
+          <div *ngIf="submitted && f['motivo'].errors" class="error-message">
             <div *ngIf="f['motivo'].errors['required']">Debe describir el motivo del soporte</div>
             <div *ngIf="f['motivo'].errors['minlength']">La descripción debe tener al menos 20 caracteres</div>
           </div>
         </div>
 
-        <div class="row remote-fields">
-          <div class="form-group col-md-4">
+        <div class="input-row remote-fields">
+          <div class="form-group input-col-third">
             <label class="form-label" for="typeRemote">Plataforma</label>
-            <ng-select id="typeRemote" formControlName="typeRemote" [items]="typeRemote" 
-              [clearable]="false" tabindex="8"></ng-select>
+            <select id="typeRemote" formControlName="typeRemote" tabindex="8">
+              <option *ngFor="let platform of typeRemote" [value]="platform">{{ platform }}</option>
+            </select>
           </div>
-          <div class="form-group col-md-4">
+          <div class="form-group input-col-third">
             <label class="form-label" for="codRemote">Código de Acceso</label>
-            <input type="text" id="codRemote" formControlName="codRemote" class="form-control"
+            <input type="text" id="codRemote" formControlName="codRemote"
               placeholder="Ingrese código" tabindex="9">
           </div>
-          <div class="form-group col-md-4">
+          <div class="form-group input-col-third">
             <label class="form-label" for="passRemote">Contraseña</label>
-            <input type="password" id="passRemote" formControlName="passRemote" class="form-control"
+            <input type="password" id="passRemote" formControlName="passRemote"
               placeholder="Ingrese contraseña" tabindex="10">
           </div>
         </div>
@@ -136,22 +153,22 @@
 
       <!-- Términos y condiciones -->
       <section class="card-section">
-        <div class="form-group terms-section mt-2">
-          <div class="custom-control custom-checkbox">
-            <input type="checkbox" class="custom-control-input" id="terms" formControlName="terms"
+        <div class="form-group terms-section">
+          <div class="checkbox-wrapper">
+            <input type="checkbox" class="checkbox-input" id="terms" formControlName="terms"
               [ngClass]="{ 'is-invalid': submitted && f['terms'].errors }" tabindex="12">
-            <label class="custom-control-label" for="terms">
-              Acepto los <a href="#" data-toggle="modal" data-target="#termsModal">términos y condiciones</a> del servicio
+            <label class="checkbox-label" for="terms">
+              Acepto los <a href="#">términos y condiciones</a> del servicio
             </label>
-            <div *ngIf="submitted && f['terms'].errors" class="invalid-feedback">
+            <div *ngIf="submitted && f['terms'].errors" class="error-message">
               Debe aceptar los términos y condiciones para continuar
             </div>
           </div>
         </div>
       </section>
 
-      <button type="submit" [disabled]="loading" class="btn btn-primary btn-block submit-btn mt-3" tabindex="13">
-        <span *ngIf="loading" class="spinner-border spinner-border-sm mr-1"></span>
+      <button type="submit" [disabled]="loading" class="submit-btn" tabindex="13">
+        <span *ngIf="loading" class="loading-spinner"></span>
         Enviar Solicitud de Soporte
       </button>
     </form>

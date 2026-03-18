@@ -58,7 +58,7 @@ label {
   padding-left: 5%;
 }
 
-input, ng-select {
+input {
   width: 95%;
   max-width: none;
   padding: 10px;
@@ -67,48 +67,236 @@ input, ng-select {
   box-sizing: border-box;
 }
 
-/* Alinear input y label de términos y condiciones */
-.terms-section {
+select {
+  width: 95%;
+  max-width: none;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+  background-color: white;
+  cursor: pointer;
+  font-size: 1rem;
+  outline: none;
+  appearance: auto;
+}
+
+select:focus {
+  border-color: #007bff;
+}
+
+input:focus,
+textarea:focus {
+  border-color: #007bff;
+  outline: none;
+}
+
+input.is-invalid,
+textarea.is-invalid,
+select.is-invalid {
+  border-color: #dc3545;
+}
+
+/* Sistema de grilla responsivo */
+.input-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  width: 100%;
+  margin-bottom: 10px;
+}
+
+.input-col-half {
+  flex: 1;
+  min-width: 280px;
+}
+
+.input-col-third {
+  flex: 1;
+  min-width: 180px;
+}
+
+/* Mensajes de error */
+.error-message {
+  color: #dc3545;
+  font-size: 0.875rem;
+  margin-top: 5px;
+  width: 95%;
+  text-align: left;
+}
+
+/* Checkbox personalizado */
+.checkbox-wrapper {
   display: flex;
   align-items: center;
+  gap: 10px;
+  width: 100%;
   justify-content: center;
-  width: 100%;
-  padding-left: 0;
-  margin:10px
 }
 
-.terms-section .custom-control {
-  display: flex;
-  align-items: center;
-  width: 100%;
+.checkbox-input {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  flex-shrink: 0;
 }
 
-.terms-section .custom-control-input {
-  margin-right: 10px;
-  width: auto;
-  min-width: 18px;
-  min-height: 18px;
-}
-
-.terms-section .custom-control-label {
+.checkbox-label {
   font-weight: normal;
-  padding-left: 0;
-  margin-bottom: 0;
-  width: auto;
+  margin: 0;
+  cursor: pointer;
+  user-select: none;
 }
 
-/* Centrar horizontalmente el contenedor de términos y condiciones dentro de la tarjeta */
+.checkbox-label a {
+  color: #007bff;
+  text-decoration: underline;
+}
+
+.checkbox-label a:hover {
+  color: #0056b3;
+}
+
+/* Botón de envío */
+.submit-btn {
+  width: 95%;
+  max-width: 700px;
+  padding: 12px 20px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  margin-top: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.submit-btn:hover:not(:disabled) {
+  background-color: #0056b3;
+}
+
+.submit-btn:disabled {
+  background-color: #6c757d;
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+/* Spinner de carga */
+.loading-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Estilos para dropdown personalizado de empresa */
+.custom-dropdown {
+  position: relative;
+  width: 95%;
+  max-width: none;
+}
+
+.dropdown-input {
+  width: 100%;
+  padding: 10px;
+  padding-right: 35px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+  font-size: 1rem;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.dropdown-input:focus {
+  border-color: #007bff;
+}
+
+.custom-dropdown.is-invalid .dropdown-input {
+  border-color: #dc3545;
+}
+
+.dropdown-arrow {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  color: #666;
+  user-select: none;
+  font-size: 12px;
+}
+
+.dropdown-list {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  max-height: 200px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ccc;
+  border-top: none;
+  border-radius: 0 0 4px 4px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dropdown-item {
+  padding: 10px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.dropdown-item:hover {
+  background-color: #f0f0f0;
+}
+
+.dropdown-item:last-child {
+  border-bottom: none;
+}
+
+.dropdown-no-results {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  padding: 10px;
+  background: white;
+  border: 1px solid #ccc;
+  border-top: none;
+  border-radius: 0 0 4px 4px;
+  color: #999;
+  text-align: center;
+  z-index: 1000;
+}
+
+/* Sección de términos y condiciones */
 .terms-section {
   display: flex;
   justify-content: center;
   align-items: center;
   width: 100%;
   padding-left: 0;
-}
-
-.terms-section .custom-control {
-  display: flex;
-  align-items: center;
+  margin: 10px 0;
 }
 
 /* Botón y previews con mismas dimensiones */
