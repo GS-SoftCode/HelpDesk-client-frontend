@@ -41,7 +41,7 @@
               No se encontraron empresas
             </div>
           </div>
-          <small class="form-text">Busque su empresa por nombre o RUC, o ingrese el nombre usted mismo.</small>
+          <small class="form-text">Si no encuentra su empresa, ingrese el nombre usted mismo.</small>
           <div *ngIf="submitted && f['ruc'].errors?.['required']" class="error-message">
             El campo Empresa o RUC es requerido
           </div>
@@ -124,6 +124,7 @@
                 (blur)="onInputBlurPlatform()"
                 placeholder="Seleccione plataforma"
                 autocomplete="off"
+                readonly
                 tabindex="8"
               />
               <div class="dropdown-arrow" (mousedown)="toggleDropdownPlatform($event)">▼</div>
@@ -146,17 +147,26 @@
           <div class="form-group input-col-third">
             <label class="form-label" for="codRemote">Código de Acceso</label>
             <input type="text" id="codRemote" formControlName="codRemote"
+              [ngClass]="{ 'is-invalid': shouldShowCodRemoteError() }"
               placeholder="Ingrese código" tabindex="9">
+            <div *ngIf="shouldShowCodRemoteError()" class="error-message">
+              El código de acceso es requerido
+            </div>
           </div>
           <div class="form-group input-col-third">
             <label class="form-label" for="passRemote">Contraseña</label>
             <input type="password" id="passRemote" formControlName="passRemote"
+              [ngClass]="{ 'is-invalid': shouldShowPassRemoteError() }"
               placeholder="Ingrese contraseña" tabindex="10">
+            <div *ngIf="shouldShowPassRemoteError()" class="error-message">
+              La contraseña de acceso es requerida
+            </div>
           </div>
         </div>
 
         <div class="form-group upload-section">
           <label class="form-label" for="evidencias">Imágenes de referencia</label>
+          <small class="form-text">Suba un máximo de 2 fotos del error o situación por atender. (Opcional)</small>
           <div class="upload-container">
             <input type="file" #fileInput id="evidencias" class="hidden-file-input" accept="image/*"
               multiple (change)="onFileSelected($event)" style="display: none;">

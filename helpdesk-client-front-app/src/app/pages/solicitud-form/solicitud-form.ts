@@ -60,7 +60,7 @@ export class SolicitudForm {
   imagen2Name: string = '';
 
   // Opciones para el dropdown de plataforma de acceso remoto
-  typeRemote: string[] = ['Ninguna', 'AnyDesk', 'RustDesk'];
+  typeRemote: string[] = ['Ninguna','AnyDesk', 'RustDesk'];
   
   constructor(
     private fb: FormBuilder,
@@ -83,6 +83,23 @@ export class SolicitudForm {
       passRemote: [''],
       terms: [false, Validators.requiredTrue],
     });
+
+    // Deshabilitar inicialmente los campos de acceso remoto (porque 'Ninguna' es el valor predeterminado)
+    this.supportForm.get('codRemote')?.disable();
+    this.supportForm.get('passRemote')?.disable();
+
+    // Escuchar cambios en el campo typeRemote
+    this.supportForm.get('typeRemote')?.valueChanges.subscribe((value) => {
+      if (value === 'Ninguna') {
+        // Deshabilitar campos
+        this.supportForm.get('codRemote')?.disable();
+        this.supportForm.get('passRemote')?.disable();
+      } else {
+        // Habilitar campos
+        this.supportForm.get('codRemote')?.enable();
+        this.supportForm.get('passRemote')?.enable();
+      }
+    });
     
     this.loadEmpresas();
     this.filteredEmpresas = [];
@@ -95,6 +112,20 @@ export class SolicitudForm {
 
   get f() {
     return this.supportForm.controls;
+  }
+
+  // Validación condicional para codRemote
+  shouldShowCodRemoteError(): boolean {
+    const typeRemoteValue = this.supportForm.get('typeRemote')?.value;
+    const codRemoteValue = this.supportForm.get('codRemote')?.value;
+    return this.submitted && typeRemoteValue !== 'Ninguna' && (!codRemoteValue || codRemoteValue.trim() === '');
+  }
+
+  // Validación condicional para passRemote
+  shouldShowPassRemoteError(): boolean {
+    const typeRemoteValue = this.supportForm.get('typeRemote')?.value;
+    const passRemoteValue = this.supportForm.get('passRemote')?.value;
+    return this.submitted && typeRemoteValue !== 'Ninguna' && (!passRemoteValue || passRemoteValue.trim() === '');
   }
 
   loadEmpresas(): void {
@@ -306,6 +337,18 @@ export class SolicitudForm {
       return;
     }
 
+    // Validación condicional para campos de acceso remoto
+    const typeRemoteValue = this.supportForm.get('typeRemote')?.value;
+    if (typeRemoteValue !== 'Ninguna') {
+      const codRemoteValue = this.supportForm.get('codRemote')?.value;
+      const passRemoteValue = this.supportForm.get('passRemote')?.value;
+      
+      if (!codRemoteValue || codRemoteValue.trim() === '' || !passRemoteValue || passRemoteValue.trim() === '') {
+        this.loading = false;
+        return;
+      }
+    }
+
     const valorSeleccionado = this.supportForm.get('ruc')?.value;
     
     // ✅ NUEVA LÓGICA: Detectar si es objeto (empresa BD) o string (texto libre)
@@ -321,6 +364,9 @@ export class SolicitudForm {
       codEmpresa = 0;
       empresaNombre = valorSeleccionado || 'Sin empresa';
     }
+
+    // Verificar si typeRemote es 'Ninguna' y asignar null
+    const typeRemote = typeRemoteValue === 'Ninguna' ? null : typeRemoteValue;
 
     const soltick: SolTickModel = {
       solicitante: {
@@ -341,7 +387,7 @@ export class SolicitudForm {
         codTecnico: '0',
         codEstado: 0,
         tfnoCliente: this.supportForm.get('whatsapp')?.value || null,
-        typeRemote: this.supportForm.get('typeRemote')?.value || null,
+        typeRemote: typeRemote,
         codRemote: this.supportForm.get('codRemote')?.value || null,
         passRemote: this.supportForm.get('passRemote')?.value || null
       },

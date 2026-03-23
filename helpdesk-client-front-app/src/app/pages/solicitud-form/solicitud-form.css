@@ -49,7 +49,7 @@
 	display: flex;
 	align-items: center;
 	justify-content: flex-start;
-	gap: 30px;
+	gap: 10%;
     border-radius: 13px;
     background: linear-gradient(90deg, var(--primary) 0%, var(--secondary) 100%);
     box-shadow: 0 5px 10px var(--shadow);
@@ -58,7 +58,7 @@
 .header-logo {
 	height: 70px;
 	width: auto;
-    margin: 3px 1px 2.5px;
+    margin: 2.5px 1.5px 3.25px;
 	object-fit: contain;
 }
 
