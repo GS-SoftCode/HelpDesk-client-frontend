@@ -15,8 +15,9 @@
     --button1: #efefef;
     --button1-hover: #cccccc;
     --button1-border: #d6deeb;
-    --button2: #05b041;
-    --button2-hover: #01842f;
+    --button2: #10b981;
+    --button2-hover: #059669;
+	background: linear-gradient(135deg, #10b981 0%, #059669 100%);
 
 	--accent-blue: #2c8ff1;
 	--accent-blue-soft: #dbeafe;
@@ -81,7 +82,6 @@
 
 .card-section {
 	background: var(--surface1);
-	border: 1px solid var(--border-color);
 	border-radius: 10px;
 	padding: 20px;
 	box-shadow: 0 5px 10px var(--shadow);

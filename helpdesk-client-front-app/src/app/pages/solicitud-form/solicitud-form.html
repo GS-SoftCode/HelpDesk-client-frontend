@@ -155,7 +155,7 @@
           </div>
           <div class="form-group input-col-third">
             <label class="form-label" for="passRemote">Contraseña</label>
-            <input type="password" id="passRemote" formControlName="passRemote"
+            <input id="passRemote" formControlName="passRemote"
               [ngClass]="{ 'is-invalid': shouldShowPassRemoteError() }"
               placeholder="Ingrese contraseña" tabindex="10">
             <div *ngIf="shouldShowPassRemoteError()" class="error-message">
@@ -213,5 +213,21 @@
         Enviar Solicitud de Soporte
       </button>
     </form>
+
+    <!-- Modales -->
+    <app-modal-exito
+      [visible]="showModalExito"
+      [message]="modalExitoMessage"
+      [data]="modalExitoData"
+      [whatsappNumber]="modalWhatsappNumber"
+      [formData]="modalFormData"
+      (onClose)="cerrarModalExito()"
+    ></app-modal-exito>
+
+    <app-modal-error-email
+      [visible]="showModalErrorEmail"
+      [data]="modalErrorEmailData"
+      (onClose)="cerrarModalErrorEmail()"
+    ></app-modal-error-email>
   </div>
 </html>

@@ -1,13 +1,16 @@
 import { Component, ChangeDetectorRef, HostListener, ElementRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, NgClass } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, AbstractControl, ValidationErrors, FormsModule } from '@angular/forms';
 
 import { SolTickModel } from '../../models/sol-tick.model';
 import { EmpresaModel } from '../../models/empresa.model';
 
 import { TicketService } from '../../services/ticket.service';
-import { NgClass } from '@angular/common';
 import { EmpresaService } from '../../services/empresa.service';
+import { WhatsappService } from '../../services/whatsapp.service';
+
+import { ModalExito, FormDataWhatsapp } from '../../modales/modal-exito/modal-exito';
+import { ModalErrorEmail } from '../../modales/modal-error-email/modal-error-email';
 
 // Validador personalizado para empresa
 function empresaValidator(control: AbstractControl): ValidationErrors | null {
@@ -27,7 +30,9 @@ function empresaValidator(control: AbstractControl): ValidationErrors | null {
     ReactiveFormsModule,
     FormsModule,
     NgClass,
-    CommonModule
+    CommonModule,
+    ModalExito,
+    ModalErrorEmail
   ],
   templateUrl: './solicitud-form.html',
   styleUrl: './solicitud-form.css',
@@ -61,11 +66,21 @@ export class SolicitudForm {
 
   // Opciones para el dropdown de plataforma de acceso remoto
   typeRemote: string[] = ['Ninguna','AnyDesk', 'RustDesk'];
+
+  // Propiedades para controlar los modales
+  showModalExito: boolean = false;
+  showModalErrorEmail: boolean = false;
+  modalExitoMessage: string = '';
+  modalExitoData: string = '';
+  modalErrorEmailData: string = '';
+  modalWhatsappNumber: string = '';
+  modalFormData: FormDataWhatsapp | null = null;
   
   constructor(
     private fb: FormBuilder,
     private _ticketService: TicketService,
     private _empresaService: EmpresaService,
+    private whatsappService: WhatsappService,
     private cdr: ChangeDetectorRef,
     private elementRef: ElementRef
   ) {}
@@ -403,8 +418,25 @@ export class SolicitudForm {
 
         switch (code) {
           case 0:
-            // ✅ Éxito
-            alert('📨 ' + message + '\n' + data);
+            // ✅ Éxito - Mostrar modal de éxito
+            this.modalExitoMessage = message;
+            this.modalExitoData = data;
+            this.modalWhatsappNumber = '593983235824';
+            
+            // Capturar datos del formulario antes de resetear
+            this.modalFormData = {
+              empresa: empresaNombre,
+              nombres: this.supportForm.get('nombres')?.value,
+              apellidos: this.supportForm.get('apellidos')?.value,
+              email: this.supportForm.get('email')?.value,
+              whatsapp: this.supportForm.get('whatsapp')?.value,
+              motivo: this.supportForm.get('motivo')?.value,
+              typeRemote: this.supportForm.get('typeRemote')?.value,
+              codRemote: this.supportForm.get('codRemote')?.value,
+              passRemote: this.supportForm.get('passRemote')?.value
+            };
+            
+            this.showModalExito = true;
             this.resetForm();
             break;
 
@@ -414,8 +446,10 @@ export class SolicitudForm {
             break;
 
           case 2:
-            // ❌ Error al enviar el correo
-            alert('❌ Ticket creado. Email inexistente, no se pudo enviar el email\n' + data);
+            // ❌ Error al enviar el correo - Mostrar modal de error de email
+            this.modalErrorEmailData = data;
+            this.showModalErrorEmail = true;
+            this.resetForm();
             break;
 
           default:
@@ -460,5 +494,19 @@ export class SolicitudForm {
     if (fileInput) {
       fileInput.value = '';
     }
+  }
+
+  // Métodos para cerrar los modales
+  cerrarModalExito(): void {
+    this.showModalExito = false;
+    this.modalExitoMessage = '';
+    this.modalExitoData = '';
+    this.modalWhatsappNumber = '';
+    this.modalFormData = null;
+  }
+
+  cerrarModalErrorEmail(): void {
+    this.showModalErrorEmail = false;
+    this.modalErrorEmailData = '';
   }
 }
