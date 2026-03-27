@@ -3,17 +3,17 @@ import { CommonModule, NgClass } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, AbstractControl, ValidationErrors, FormsModule } from '@angular/forms';
 
 import { SolTickModel } from '../../models/sol-tick.model';
-import { EmpresaModel } from '../../models/empresa.model';
+import { ClienteModel } from '../../models/cliente.model';
 
 import { TicketService } from '../../services/ticket.service';
-import { EmpresaService } from '../../services/empresa.service';
+import { ClienteService } from '../../services/cliente.service';
 import { WhatsappService } from '../../services/whatsapp.service';
 
 import { ModalExito, FormDataWhatsapp } from '../../modales/modal-exito/modal-exito';
 import { ModalErrorEmail } from '../../modales/modal-error-email/modal-error-email';
 
-// Validador que acepta: empresa de BD (objeto), texto libre (string) o número
-function empresaValidator(control: AbstractControl): ValidationErrors | null {
+// Validador que acepta: cliente de BD (objeto), texto libre (string) o número
+function clienteValidator(control: AbstractControl): ValidationErrors | null {
   const value = control.value;
   if (value === null || value === undefined || value === '') {
     return { required: true };
@@ -40,11 +40,11 @@ export class SolicitudForm {
   loading = false;
   error: string = '';
 
-  empresas: EmpresaModel[] = [];
+  clientes: ClienteModel[] = [];
   searchText: string = '';
   showDropdown: boolean = false;
-  filteredEmpresas: EmpresaModel[] = [];
-  selectedEmpresa: EmpresaModel | null = null;
+  filteredClientes: ClienteModel[] = [];
+  selectedCliente: ClienteModel | null = null;
   searchTextPlatform: string = '';
   showDropdownPlatform: boolean = false;
   filteredPlatforms: string[] = [];
@@ -68,7 +68,7 @@ export class SolicitudForm {
   constructor(
     private fb: FormBuilder,
     private _ticketService: TicketService,
-    private _empresaService: EmpresaService,
+    private _clienteService: ClienteService,
     private whatsappService: WhatsappService,
     private cdr: ChangeDetectorRef,
     private elementRef: ElementRef
@@ -76,7 +76,7 @@ export class SolicitudForm {
 
   ngOnInit(): void {
     this.supportForm = this.fb.group({
-      ruc: [null, empresaValidator],
+      ruc: [null, clienteValidator],
       nombres: ['', Validators.required],
       apellidos: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
@@ -102,8 +102,8 @@ export class SolicitudForm {
       }
     });
     
-    this.loadEmpresas();
-    this.filteredEmpresas = [];
+    this.loadClientes();
+    this.filteredClientes = [];
     this.filteredPlatforms = [...this.typeRemote];
     this.searchTextPlatform = 'Ninguna';
     this.selectedPlatform = 'Ninguna';
@@ -125,32 +125,32 @@ export class SolicitudForm {
     return this.submitted && typeRemoteValue !== 'Ninguna' && (!passRemoteValue || passRemoteValue.trim() === '');
   }
 
-  loadEmpresas(): void {
-    this._empresaService.getAll().subscribe({
-      next: (resp) => {
+  loadClientes(): void {
+    this._clienteService.getAll().subscribe({
+      next: (resp: ClienteModel[]) => {
         setTimeout(() => {
-          this.empresas = resp ?? [];
-          this.filteredEmpresas = [...this.empresas];
+          this.clientes = resp ?? [];
+          this.filteredClientes = [...this.clientes];
         }, 0);
       },
-      error: (err) => {
-        console.error('Error cargando empresas', err);
-        this.error = 'No se pudieron cargar las empresas.';
+      error: (err: any) => {
+        console.error('Error cargando clientes', err);
+        this.error = 'No se pudieron cargar los clientes.';
       },
     });
   }
 
   onSearchChange(): void {
     const term = this.searchText.toLowerCase().trim();
-    this.selectedEmpresa = null;
+    this.selectedCliente = null;
     
     if (term === '') {
-      this.filteredEmpresas = [...this.empresas];
+      this.filteredClientes = [...this.clientes];
       this.showDropdown = true;
     } else {
-      this.filteredEmpresas = this.empresas.filter(empresa =>
-        empresa.nomEmpresa?.toLowerCase().includes(term) ||
-        empresa.nomRuc?.toLowerCase().includes(term)
+      this.filteredClientes = this.clientes.filter(cliente =>
+        cliente.nomClienteRep?.toLowerCase().includes(term) ||
+        cliente.numId?.toLowerCase().includes(term)
       );
       this.showDropdown = true;
     }
@@ -161,19 +161,19 @@ export class SolicitudForm {
     event.stopPropagation();
     this.showDropdown = !this.showDropdown;
     if (this.showDropdown && this.searchText === '') {
-      this.filteredEmpresas = [...this.empresas];
+      this.filteredClientes = [...this.clientes];
     }
   }
 
-  selectEmpresa(empresa: EmpresaModel): void {
-    this.selectedEmpresa = empresa;
-    this.searchText = empresa.nomEmpresa;
-    this.supportForm.patchValue({ ruc: empresa });
+  selectCliente(cliente: ClienteModel): void {
+    this.selectedCliente = cliente;
+    this.searchText = cliente.nomClienteRep;
+    this.supportForm.patchValue({ ruc: cliente });
     this.showDropdown = false;
   }
 
   onInputBlur(): void {
-    if (this.searchText && !this.selectedEmpresa) {
+    if (this.searchText && !this.selectedCliente) {
       this.supportForm.patchValue({ ruc: this.searchText });
     }
   }
@@ -213,8 +213,8 @@ export class SolicitudForm {
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent): void {
     const target = event.target as HTMLElement;
-    const clickedInsideEmpresa = target.closest('.custom-dropdown');
-    if (!clickedInsideEmpresa) {
+    const clickedInsideCliente = target.closest('.custom-dropdown');
+    if (!clickedInsideCliente) {
       this.showDropdown = false;
       this.showDropdownPlatform = false;
     }
@@ -323,16 +323,19 @@ export class SolicitudForm {
     }
 
     const valorSeleccionado = this.supportForm.get('ruc')?.value;
+    let codCliente: number;
     let codEmpresa: number;
-    let empresaNombre: string;
+    let clienteNombre: string;
 
-    // Distinguir si es empresa de BD (objeto) o texto libre (string)
+    // Distinguir si es cliente de BD (objeto) o texto libre (string)
     if (typeof valorSeleccionado === 'object' && valorSeleccionado) {
+      codCliente = valorSeleccionado.codCliente;
       codEmpresa = valorSeleccionado.codEmpresa;
-      empresaNombre = valorSeleccionado.nomEmpresa;
+      clienteNombre = valorSeleccionado.nomClienteRep;
     } else {
+      codCliente = 0;
       codEmpresa = 0;
-      empresaNombre = valorSeleccionado || 'Sin empresa';
+      clienteNombre = valorSeleccionado || 'Sin cliente';
     }
 
     const typeRemote = typeRemoteValue === 'Ninguna' ? null : typeRemoteValue;
@@ -340,7 +343,7 @@ export class SolicitudForm {
     const soltick: SolTickModel = {
       solicitante: {
         codEmpresa: codEmpresa,
-        codCliente: 1,
+        codCliente: codCliente !== 0 ? codCliente : 1,
         nomSolicitante: this.supportForm.get('nombres')?.value,
         apeSolicitante: this.supportForm.get('apellidos')?.value,
         emailSolicitante: this.supportForm.get('email')?.value,
@@ -348,13 +351,13 @@ export class SolicitudForm {
       },
       ticket: {
         codTicket: 0,
+        codCliente: codCliente,
         codEmpresa: codEmpresa,
-        txtTitulo: empresaNombre,
+        txtTitulo: clienteNombre,
         txtDesc: this.supportForm.get('motivo')?.value,
         fecCreacion: new Date().toISOString(),
-        codCliente: '0',
         codTecnico: '0',
-        codEstado: 0,
+        codEstado: 1,
         tfnoCliente: this.supportForm.get('whatsapp')?.value || null,
         typeRemote: typeRemote,
         codRemote: this.supportForm.get('codRemote')?.value || null,
@@ -374,9 +377,9 @@ export class SolicitudForm {
           case 0: // Éxito completo
             this.modalExitoMessage = message;
             this.modalExitoData = data;
-            this.modalWhatsappNumber = '593983235824';
+            this.modalWhatsappNumber = '593987891260';
             this.modalFormData = {
-              empresa: empresaNombre,
+              empresa: clienteNombre,
               nombres: this.supportForm.get('nombres')?.value,
               apellidos: this.supportForm.get('apellidos')?.value,
               email: this.supportForm.get('email')?.value,
