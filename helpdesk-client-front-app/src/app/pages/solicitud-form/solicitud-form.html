@@ -6,8 +6,6 @@
     </header>
 
     <form class="ticket-form" [formGroup]="supportForm" (ngSubmit)="onSubmit()">
-      
-      <!-- Empresa -->
       <section class="card-section">
         <h4 class="section-heading">Empresa</h4>
         <div class="form-group">
@@ -48,7 +46,6 @@
         </div>
       </section>
 
-      <!-- Datos del Solicitante -->
       <section class="card-section">
         <h4 class="section-heading">Datos del Solicitante</h4>
         <div class="input-row">
@@ -95,7 +92,6 @@
         </div>
       </section>
 
-      <!-- Motivo del Soporte -->
       <section class="card-section">
         <h4 class="section-heading">Motivo del Soporte</h4>
         <div class="form-group">
@@ -192,7 +188,6 @@
         </div>
       </section>
 
-      <!-- Términos y condiciones -->
       <section class="card-section">
         <div class="form-group terms-section">
           <div class="checkbox-wrapper">
@@ -214,7 +209,6 @@
       </button>
     </form>
 
-    <!-- Modales -->
     <app-modal-exito
       [visible]="showModalExito"
       [message]="modalExitoMessage"

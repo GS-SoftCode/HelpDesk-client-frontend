@@ -1,4 +1,3 @@
-/* Backdrop del modal */
 .modal-backdrop {
   position: fixed;
   top: 0;
@@ -22,7 +21,6 @@
   }
 }
 
-/* Contenedor del modal */
 .modal-container {
   background: white;
   border-radius: 12px;
@@ -45,7 +43,6 @@
   }
 }
 
-/* Header del modal */
 .modal-header {
   background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
   padding: 30px 24px;
@@ -68,7 +65,6 @@
   font-weight: 600;
 }
 
-/* Cuerpo del modal */
 .modal-body {
   padding: 32px 24px;
   text-align: center;
@@ -118,7 +114,6 @@
   font-style: italic;
 }
 
-/* Footer del modal */
 .modal-footer {
   padding: 0 24px 24px 24px;
   display: flex;
@@ -147,7 +142,6 @@
   transform: translateY(0);
 }
 
-/* Responsive */
 @media (max-width: 640px) {
   .modal-container {
     width: 95%;

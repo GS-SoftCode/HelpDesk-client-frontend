@@ -17,7 +17,6 @@ export class ModalErrorEmail {
     this.onClose.emit();
   }
 
-  // Cerrar modal al hacer clic en el backdrop
   cerrarPorBackdrop(event: MouseEvent): void {
     if ((event.target as HTMLElement).classList.contains('modal-backdrop')) {
       this.cerrarModal();

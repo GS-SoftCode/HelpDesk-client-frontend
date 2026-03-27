@@ -3,7 +3,7 @@ export class TicketModel {
     codEmpresa!: number;
     txtTitulo!: string;
     txtDesc!: string;
-    fecCreacion!: string; // o Date
+    fecCreacion!: string;
     codCliente!: string;
     codTecnico!: string;
     codEstado!: number;

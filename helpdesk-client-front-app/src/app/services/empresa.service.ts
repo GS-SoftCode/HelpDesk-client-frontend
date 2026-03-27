@@ -11,7 +11,6 @@ import { EmpresaModel } from '../models/empresa.model';
 export class EmpresaService {
   constructor(private http: HttpClient) { }
 
-  // Obtener todas las empresas
   getAll(): Observable<EmpresaModel[]> {
     return this.http.get<any[]>(`${env.apiUrl}/empresas`).pipe(
       map((rows) =>

@@ -12,15 +12,12 @@ import { WhatsappService } from '../../services/whatsapp.service';
 import { ModalExito, FormDataWhatsapp } from '../../modales/modal-exito/modal-exito';
 import { ModalErrorEmail } from '../../modales/modal-error-email/modal-error-email';
 
-// Validador personalizado para empresa
+// Validador que acepta: empresa de BD (objeto), texto libre (string) o número
 function empresaValidator(control: AbstractControl): ValidationErrors | null {
   const value = control.value;
-  
-  // Aceptar: números (ID de BD), strings (texto libre), u objetos (empresa BD)
   if (value === null || value === undefined || value === '') {
     return { required: true };
   }
-  
   return null;
 }
 
@@ -44,14 +41,10 @@ export class SolicitudForm {
   error: string = '';
 
   empresas: EmpresaModel[] = [];
-  
-  // Propiedades para el dropdown personalizado de empresas
   searchText: string = '';
   showDropdown: boolean = false;
   filteredEmpresas: EmpresaModel[] = [];
   selectedEmpresa: EmpresaModel | null = null;
-
-  // Propiedades para el dropdown personalizado de plataforma
   searchTextPlatform: string = '';
   showDropdownPlatform: boolean = false;
   filteredPlatforms: string[] = [];
@@ -63,11 +56,7 @@ export class SolicitudForm {
   imagen2Preview: string = '';
   imagen1Name: string = '';
   imagen2Name: string = '';
-
-  // Opciones para el dropdown de plataforma de acceso remoto
   typeRemote: string[] = ['Ninguna','AnyDesk', 'RustDesk'];
-
-  // Propiedades para controlar los modales
   showModalExito: boolean = false;
   showModalErrorEmail: boolean = false;
   modalExitoMessage: string = '';
@@ -99,18 +88,15 @@ export class SolicitudForm {
       terms: [false, Validators.requiredTrue],
     });
 
-    // Deshabilitar inicialmente los campos de acceso remoto (porque 'Ninguna' es el valor predeterminado)
     this.supportForm.get('codRemote')?.disable();
     this.supportForm.get('passRemote')?.disable();
 
-    // Escuchar cambios en el campo typeRemote
+    // Habilitar/deshabilitar campos según plataforma de acceso remoto
     this.supportForm.get('typeRemote')?.valueChanges.subscribe((value) => {
       if (value === 'Ninguna') {
-        // Deshabilitar campos
         this.supportForm.get('codRemote')?.disable();
         this.supportForm.get('passRemote')?.disable();
       } else {
-        // Habilitar campos
         this.supportForm.get('codRemote')?.enable();
         this.supportForm.get('passRemote')?.enable();
       }
@@ -118,8 +104,6 @@ export class SolicitudForm {
     
     this.loadEmpresas();
     this.filteredEmpresas = [];
-    
-    // Inicializar dropdown de plataforma
     this.filteredPlatforms = [...this.typeRemote];
     this.searchTextPlatform = 'Ninguna';
     this.selectedPlatform = 'Ninguna';
@@ -129,14 +113,12 @@ export class SolicitudForm {
     return this.supportForm.controls;
   }
 
-  // Validación condicional para codRemote
   shouldShowCodRemoteError(): boolean {
     const typeRemoteValue = this.supportForm.get('typeRemote')?.value;
     const codRemoteValue = this.supportForm.get('codRemote')?.value;
     return this.submitted && typeRemoteValue !== 'Ninguna' && (!codRemoteValue || codRemoteValue.trim() === '');
   }
 
-  // Validación condicional para passRemote
   shouldShowPassRemoteError(): boolean {
     const typeRemoteValue = this.supportForm.get('typeRemote')?.value;
     const passRemoteValue = this.supportForm.get('passRemote')?.value;
@@ -158,11 +140,8 @@ export class SolicitudForm {
     });
   }
 
-  // Métodos para el dropdown personalizado de empresas
   onSearchChange(): void {
     const term = this.searchText.toLowerCase().trim();
-    
-    // Limpiar selección cuando el usuario escribe
     this.selectedEmpresa = null;
     
     if (term === '') {
@@ -194,13 +173,11 @@ export class SolicitudForm {
   }
 
   onInputBlur(): void {
-    // Si el usuario escribió texto libre sin seleccionar una empresa
     if (this.searchText && !this.selectedEmpresa) {
       this.supportForm.patchValue({ ruc: this.searchText });
     }
   }
 
-  // Métodos para el dropdown personalizado de plataforma
   onSearchChangePlatform(): void {
     const term = this.searchTextPlatform.toLowerCase().trim();
     
@@ -231,20 +208,13 @@ export class SolicitudForm {
     this.showDropdownPlatform = false;
   }
 
-  onInputBlurPlatform(): void {
-    // No hacer nada aquí, el cierre lo maneja el HostListener
-  }
+  onInputBlurPlatform(): void {}
 
-  // Detectar clics fuera de los dropdowns para cerrarlos
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent): void {
     const target = event.target as HTMLElement;
-    
-    // Verificar si el clic es dentro de algún dropdown
     const clickedInsideEmpresa = target.closest('.custom-dropdown');
-    
     if (!clickedInsideEmpresa) {
-      // Si el clic es fuera de cualquier dropdown, cerrar ambos
       this.showDropdown = false;
       this.showDropdownPlatform = false;
     }
@@ -256,28 +226,23 @@ export class SolicitudForm {
       return;
     }
     const files = Array.from(input.files);
-    // Validar que no sean más de 2 imágenes
     const imagenesActuales = (this.imagen1Base64 ? 1 : 0) + (this.imagen2Base64 ? 1 : 0);
     if (imagenesActuales + files.length > 2) {
       alert('⚠️ Solo puede tener máximo 2 imágenes. Elimine alguna para subir más.');
       input.value = '';
       return;
     }
-    // Procesar cada archivo
     let processed = 0;
     files.forEach((file) => {
-      // Validar que sea una imagen
       if (!file.type.startsWith('image/')) {
         alert(`⚠️ El archivo "${file.name}" no es una imagen válida`);
         return;
       }
-      // Validar tamaño (máximo 2MB por imagen)
       const maxSizeInBytes = 2 * 1024 * 1024;
       if (file.size > maxSizeInBytes) {
         alert(`⚠️ La imagen "${file.name}" supera el tamaño máximo de 2MB`);
         return;
       }
-      // Determinar dónde colocar la imagen
       let targetSlot: number;
       if (!this.imagen1Base64) {
         targetSlot = 0;
@@ -287,18 +252,15 @@ export class SolicitudForm {
         alert('⚠️ Ya tienes 2 imágenes cargadas. Elimina una para agregar otra.');
         return;
       }
-      // Convertir a Base64
       this.convertToBase64(file, targetSlot, true);
       processed++;
     });
-    // Forzar actualización de vista si se procesó al menos una imagen
     if (processed > 0) {
       setTimeout(() => this.cdr.detectChanges(), 0);
     }
     input.value = '';
   }
 
-  // ✅ NUEVO MÉTODO: Convertir archivo a Base64
   convertToBase64(file: File, index: number, forceDetect: boolean = false): void {
     const reader = new FileReader();
     reader.onload = () => {
@@ -324,7 +286,6 @@ export class SolicitudForm {
     reader.readAsDataURL(file);
   }
 
-  // ✅ NUEVO MÉTODO: Eliminar imagen
   removeImage(imageNumber: number): void {
     if (imageNumber === 1) {
       this.imagen1Base64 = '';
@@ -335,8 +296,6 @@ export class SolicitudForm {
       this.imagen2Preview = '';
       this.imagen2Name = '';
     }
-    
-    // Limpiar el input file
     const fileInput = document.getElementById('evidencias') as HTMLInputElement;
     if (fileInput) {
       fileInput.value = '';
@@ -352,7 +311,6 @@ export class SolicitudForm {
       return;
     }
 
-    // Validación condicional para campos de acceso remoto
     const typeRemoteValue = this.supportForm.get('typeRemote')?.value;
     if (typeRemoteValue !== 'Ninguna') {
       const codRemoteValue = this.supportForm.get('codRemote')?.value;
@@ -365,22 +323,18 @@ export class SolicitudForm {
     }
 
     const valorSeleccionado = this.supportForm.get('ruc')?.value;
-    
-    // ✅ NUEVA LÓGICA: Detectar si es objeto (empresa BD) o string (texto libre)
     let codEmpresa: number;
     let empresaNombre: string;
 
+    // Distinguir si es empresa de BD (objeto) o texto libre (string)
     if (typeof valorSeleccionado === 'object' && valorSeleccionado) {
-      // Es una empresa de la BD (objeto)
       codEmpresa = valorSeleccionado.codEmpresa;
       empresaNombre = valorSeleccionado.nomEmpresa;
     } else {
-      // Es texto libre (string), usuario escribió sin seleccionar
       codEmpresa = 0;
       empresaNombre = valorSeleccionado || 'Sin empresa';
     }
 
-    // Verificar si typeRemote es 'Ninguna' y asignar null
     const typeRemote = typeRemoteValue === 'Ninguna' ? null : typeRemoteValue;
 
     const soltick: SolTickModel = {
@@ -397,7 +351,7 @@ export class SolicitudForm {
         codEmpresa: codEmpresa,
         txtTitulo: empresaNombre,
         txtDesc: this.supportForm.get('motivo')?.value,
-        fecCreacion: new Date().toISOString(), // Fecha y hora del cliente
+        fecCreacion: new Date().toISOString(),
         codCliente: '0',
         codTecnico: '0',
         codEstado: 0,
@@ -417,13 +371,10 @@ export class SolicitudForm {
         const data = respEmail.data;
 
         switch (code) {
-          case 0:
-            // ✅ Éxito - Mostrar modal de éxito
+          case 0: // Éxito completo
             this.modalExitoMessage = message;
             this.modalExitoData = data;
             this.modalWhatsappNumber = '593983235824';
-            
-            // Capturar datos del formulario antes de resetear
             this.modalFormData = {
               empresa: empresaNombre,
               nombres: this.supportForm.get('nombres')?.value,
@@ -440,34 +391,27 @@ export class SolicitudForm {
             this.resetForm();
             break;
 
-          case 1:
-            // ❌ Error al crear ticket o solicitante
+          case 1: // Error al crear ticket
             alert('⚠️ ' + message + '\n' + data);
             break;
 
-          case 2:
-            // ❌ Error al enviar el correo - Mostrar modal de error de email
+          case 2: // Ticket creado, error al enviar email
             this.modalErrorEmailData = data;
             this.showModalErrorEmail = true;
             this.resetForm();
             break;
 
           default:
-            // ❓ Código inesperado
             alert('❓ Respuesta desconocida del servidor');
             console.warn('Respuesta inesperada:', respEmail);
             break;
         }
-        // Limpia el formulario
         this.supportForm.reset();
-        // Control "terms" vuelve a `false`
         this.supportForm.patchValue({ terms: false });
-        // Reinicia el flag de validación
         this.submitted = false;
       },
       error: (errorEmail) => {
-        // ❌ Error de red, caída del backend, CORS, etc.
-        console.error('❌ Error en la conexión o en el servidor:', errorEmail);
+        console.error('Error en la conexión o en el servidor:', errorEmail);
         alert('❌ Error de conexión con el servidor. Intente más tarde.');
       },
       complete: () => {
@@ -480,23 +424,18 @@ export class SolicitudForm {
     this.supportForm.reset();
     this.supportForm.patchValue({ terms: false });
     this.submitted = false;
-    
-    // Limpiar imágenes
     this.imagen1Base64 = '';
     this.imagen2Base64 = '';
     this.imagen1Preview = '';
     this.imagen2Preview = '';
     this.imagen1Name = '';
     this.imagen2Name = '';
-    
-    // Limpiar input file
     const fileInput = document.getElementById('evidencias') as HTMLInputElement;
     if (fileInput) {
       fileInput.value = '';
     }
   }
 
-  // Métodos para cerrar los modales
   cerrarModalExito(): void {
     this.showModalExito = false;
     this.modalExitoMessage = '';

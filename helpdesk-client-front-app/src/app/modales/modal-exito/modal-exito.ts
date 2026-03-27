@@ -32,7 +32,6 @@ export class ModalExito {
   constructor(private whatsappService: WhatsappService) {}
 
   cerrarModal(): void {
-    // Enviar mensaje de WhatsApp si hay número
     if (this.whatsappNumber && this.formData) {
       const mensaje = this.construirMensaje();
       this.whatsappService.openWhatsapp(this.whatsappNumber, mensaje);
@@ -60,7 +59,6 @@ export class ModalExito {
     return mensaje;
   }
 
-  // Cerrar modal al hacer clic en el backdrop
   cerrarPorBackdrop(event: MouseEvent): void {
     if ((event.target as HTMLElement).classList.contains('modal-backdrop')) {
       this.cerrarModal();
