@@ -94,6 +94,8 @@ export class SolicitudForm {
     // Habilitar/deshabilitar campos según plataforma de acceso remoto
     this.supportForm.get('typeRemote')?.valueChanges.subscribe((value) => {
       if (value === 'Ninguna') {
+        this.supportForm.get('codRemote')?.setValue('');
+        this.supportForm.get('passRemote')?.setValue('');
         this.supportForm.get('codRemote')?.disable();
         this.supportForm.get('passRemote')?.disable();
       } else {
@@ -334,7 +336,7 @@ export class SolicitudForm {
       clienteNombre = valorSeleccionado.nomClienteRep;
     } else {
       codCliente = 0;
-      codEmpresa = 0;
+      codEmpresa = 10;
       clienteNombre = valorSeleccionado || 'Sin cliente';
     }
 
@@ -343,7 +345,7 @@ export class SolicitudForm {
     const soltick: SolTickModel = {
       solicitante: {
         codEmpresa: codEmpresa,
-        codCliente: codCliente !== 0 ? codCliente : 1,
+        codCliente: codCliente,
         nomSolicitante: this.supportForm.get('nombres')?.value,
         apeSolicitante: this.supportForm.get('apellidos')?.value,
         emailSolicitante: this.supportForm.get('email')?.value,
